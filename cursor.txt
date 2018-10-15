@@ -1,0 +1,140 @@
+cursor
+
+use flow : declare cursor --> 
+						open cursor --> 
+						-->	load cursor 
+						|		--> determine if data is null
+						|			 --> yes --> close cursor
+						---------------- no	
+			1.	declare cursor
+				function body :
+					cursor cur_name[(input_parameter1[,input_parameter2]...)]
+					[return ret_type]
+					is select_sentence;
+					
+				key word:
+					1. cur_name: express the name of declare cursor
+					2. ret_type: express the type of the return value
+					3. select_sentence: the SELECT statement, it provides result list
+				
+				Example: declare a cursor ,load information from result list about employee whose job is SALESMAN
+				cursor cur_emp(var_job varchar2:='SALESMAN')
+				is select empno,ename,sal
+				from emp
+				where job=var_job;
+			
+			2. open cursor
+				function:
+					open cur_name[(para_value1[,para_value2]...)];
+					
+					*para_value : if you don't input,the value is default(input_parameter1).
+			
+			3. load cursor
+				function:
+					fetch cur_name into{variable};
+					
+					*variable: it is used to save data,you need to declare it because the result contain n rows.
+					Generally,the type of variable is RECORD
+			
+			4. close cursor
+				function:
+					close cur_name;
+					
+			How to use cursor:		
+			Example
+				
+				declare
+				cursor cur_emp(var_job varchar2:='SALESMAN')
+				is select empno,ename,sal from emp
+				where job=var_job;
+				type record_emp is record
+				(
+					var_empno emp.empno%type,
+					var_ename emp.ename%type,
+					var_sal emp.sal%type
+				);
+				emp_row record_emp;
+				begin
+				open cur_emp('MANAGER');
+				fetch cur_emp into emp_row;
+				while cur_emp%found loop
+				dbms_output.put_line(emp_row.var_ename||' id is '||emp_row.var_empno||',salary is '||emp_row.var_sal);
+				fetch cur_emp into emp_row;
+				end loop;
+				close cur_emp;
+				end;
+				/
+				
+property of cursor
+
+		1. %found(BOOLEAN):number of the result list is more than one,otherwise value is false
+		2. %notfound(BOOLEAN):function of this is opposite to %found
+		3. %rowfound(BOOLEAN):return number of result list,how many column
+		4. %isopen(BOOLEAN):if cursor has been openned,value is true.otherwise value is false.
+					
+implicit(隐式) cursor
+	
+	Generally,it uses for UPDATE and DELETE,default cur_name is sql.
+	
+	Example:Increase salary of SALESMAN by 20%
+	
+	begin
+	update emp
+	set sal=sal*1.2
+	where job='SALESMAN';
+	if sql%notfound then
+	dbms_output.put_line('no changed');
+	else
+	dbms_output.put_line(sql%rowcount||' person,their salary has been increased !');
+	end if;
+	end;
+	/
+
+how to use FOR statement to traversing(遍历) result list of implicit cursor:
+		range is the return value of SELECT statement.So type of variable is RECORD
+		
+		function body:
+			for [variable] in [SELECT sql]
+			loop
+				action;
+			end loop;
+			end;
+			/
+			
+		Example:
+		
+		begin
+		for emp_info in (select empno,ename,sal from emp where job='SALESMAN')
+		loop
+			dbms_output.put_line(emp_info.ename||' , id: '||emp_info.empno||' ,salary: '||emp_info.sal);
+		end loop;
+		end;
+		/
+		
+		
+how to use FOR statement to traversing(遍历) result list of cursor:
+
+	function body:
+		for var_auto_record in curname loop
+		plsql;
+		end loop;
+		
+		key word:
+			1. var_auto_record: the type of variable is RECORD. It's auto.
+			2.cur_name: point a cursor
+			
+		Example:
+			declare
+			cursor cur_emp is
+			select * from emp
+			where deptno=30;
+			begin
+			for emp_record in cur_emp
+			loop
+			dbms_output.put_line('ID: '||emp_record.empno||' ,NAME: '||emp_record.ename||' ,SALARY: '||emp_record.sal);
+			end loop;
+			end;
+			/
+			
+*************************************NOTICE********************************
+use FOR statement to traversing the cursor.you don't need to open cursor and close it.Oracle has been do these operation auto.

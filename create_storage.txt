@@ -1,0 +1,138 @@
+ Create Storage flow:
+	function body:
+		create [or replace] procedure pro_name [(parameter1[,parameter2]...)] is|as
+		begin 
+		plsql_sentences;
+		[exception]
+		[dowith_sentences;]
+		end [pro_name];
+		
+		key words:
+			1. pro_name: the name of the procedure that is created,if this name has been being,use [create or replace] to cover the old version.
+			2. parameter: if input parameter,key word [in] is should follow parameter. if output parameter,[out] is should follow parameter.
+			And then should point type of parameter.
+			3. dowith_sentences:exception statements.
+		
+		Example: without parameter.
+			1. new procedure name
+			create procedure pro_insertDept is
+			begin
+			insert into dept values (99,'SuperTest','BEIJING');
+			commit;
+			dbms_output.put_line('insert a new record!');
+			end pro_insertDept;
+			
+			2. old procedure name
+			create or replace procedure pro_insertDept is
+			begin
+			insert into dept values (77,'SuperTest','BEIJING');
+			commit;
+			dbms_output.put_line('insert a new record!');
+			end pro_insertDept;
+			/
+			
+			
+		Use execute to run procedure,like 'execute pro_insertDept;'
+		
+		Example: IN Model parameter
+		create or replace procedure insert_dept(
+		num_deptno in number,
+		var_ename in varchar2,
+		var_loc in varchar2) is
+		begin
+		insert into dept
+		values(num_deptno,var_ename,var_loc);
+		commit;
+		dbms_output.put_line('num_deptno\var_ename\var_loc: '||num_deptno||' '||var_ename||' '||var_loc);
+		end insert_dept;
+		/
+		
+		How to run procedure:
+			begin
+			pro_name(parameter_name=>value...);
+			end;
+			/
+		Example:
+			begin
+			insert_dept(var_ename=>'PURCHASING',var_loc=>'CHENGDU',num_deptno=>15);
+			end;
+			/
+			
+		OR: don't need to point pro_name.just need to follow sequence of parameter;
+		
+			begin
+			insert_dept(16,'MARKET','CHENGDU');
+			end;
+			/
+			
+		Example: OUT Model parameter
+		
+		create or replace procedure select_dept(
+		num_deptno in number,
+		var_dname out dept.dname%type,
+		var_loc out dept.loc%type) is
+		begin
+		select dname,loc
+		into var_dname,var_loc
+		from dept
+		where deptno=num_deptno;
+		exception
+		when no_data_found then
+		dbms_output.put_line('this dept id is not existed');
+		end select_dept;
+		/
+		
+		How to run this statement
+		declare
+		var_dname dept.dname%type;
+		var_loc dept.loc%type;
+		begin
+		select_dept(77,var_dname,var_loc);
+		dbms_output.put_line(var_dname||' in '||var_loc);
+		end;
+		/
+		
+		Another way: Use EXEC to run OUT Model procedure.We need use variable to declare parameter.Finally,We can use PRINT\SELECT to print results
+		Example:
+		variable var_dname varchar2(50);
+		variable var_loc varchar2(50);
+		exec select_dept(77,:var_dname,:var_loc);
+		
+		print var_dname var_loc; OR select :var_dname,:var_loc from dual;
+		
+		
+		Example IN\ON Model
+		create or replace procedure pro_square(
+		num in out number,
+		flag in boolean) is
+		i int:=2;
+		begin
+		if flag then
+		num:=power(num,i);
+		else
+		num:=sqrt(num);
+		end if;
+		end;
+		/
+		
+		Run:
+		declare
+		var_number number;
+		var_temp number;
+		flag boolean;
+		begin
+		var_temp:=3;
+		var_number:=var_temp;
+		flag:=false;
+		pro_square(var_number,flag);
+		if flag then
+		dbms_output.put_line(var_temp||' power is ' || var_number);
+		else 
+		dbms_output.put_line(var_temp||' sqrt is '|| var_number);
+		end if;
+		end;
+		/
+		
+		
+		IN default value:
+			variable_name in (type) [default] value
