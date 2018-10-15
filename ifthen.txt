@@ -1,0 +1,37 @@
+/*
+	this is an exercise file
+	
+	Practice project include:if then \ case then
+
+*/
+
+
+declare
+var_sentence1 varchar2(20);
+var_sentence2 varchar2(20);
+begin
+var_sentence1:='yang';
+var_sentence2:='guo';
+if length(var_sentence1) > length(var_sentence2) then
+dbms_output.put_line('sentence1 is longer than sentence2');
+if var_sentence1 <> 'zz' then
+dbms_output.put_line('sentence1 is not zz);
+end if;
+end if;
+end;
+/
+
+declare
+session number(10);
+info varchar2(100);
+begin
+session:=1;
+case session
+when 1 then
+ info:=session||' is most handsome';
+when 2 then
+ info:=session||' is most cool';
+end case;
+dbms_output.put_line(info);
+end;
+/

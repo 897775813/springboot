@@ -1,0 +1,37 @@
+1. How to create a function:
+	body:
+		create [or replace] function fun_name(parameter1[,parameter2]...) return data_type is
+		[inner_variable]
+		begin
+		plsql_sentences;
+		[exception]
+		[dowith_sentences;]
+		end [fun_name];
+		
+	Example:
+		create or replace function get_avg_pay(num_deptno number) return number is
+		num_avg_pay number;
+		begin
+		select avg(sal) into num_avg_pay from emp where deptno=num_deptno;
+		return(round(num_avg_pay,2));
+		exception
+		when no_data_found then
+		dbms_output.put_line('error deptno!!');
+		return(0);
+		end;
+		/
+		
+	How to use Function:
+		declare
+		avg_number number;
+		begin
+		avg_number:=get_avg_pay(1);
+		dbms_output.put_line('avg of salary: '||avg_numberY);
+		end;
+		/
+		
+	***** We can found that when we input error deptno,the return value is not null row,So exception is not useful!!
+	（聚合函数中sum\avg\min\max不会造成查询结果为0行，会返回' '值，既不是null也不会no row。count会返回0，所以异常里的no_data_found就不会被触发
+	
+	Drop function：
+		drop function fun_name;

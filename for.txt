@@ -1,0 +1,82 @@
+/*
+	include : while \ for \ loop 
+*/
+
+loop :
+	first run plsql , then run conditional statements(条件语句), 
+	if result is true, cycle termination(循环终止). 
+	if result is false ,go on.
+	
+	function body :
+		loop
+		plsql;(one or more)
+		exit when conditional_statements ;
+		end loop;
+	Example:
+		
+		declare
+		num int:=0;
+		begin
+		loop
+		dbms_output.put_line(num);
+		num:=num+1;
+		exit when num>10;
+		end loop;
+		end;
+		/
+		
+while :
+	first run conditional statements,if result is true,go on.
+	if result is false,cycle termination.
+	
+	function body :
+		while conditional_statements loop
+		plsql;(one or more)
+		end loop;
+	
+	Example:
+		
+		declare
+		num int:=10;
+		begin
+		while num>0 loop
+		dbms_output.put_line(num);
+		num:=num-1;
+		end loop;
+		end;
+		/
+		
+		
+for	:
+	this function have a range, plsql sentence is running in this range.
+	
+	function body :
+	for variable_counter_name in [reverse] lower_limit..upper_limit loop
+	plsql;
+	end loop;
+	
+	* key word:
+		reverse: if reverse is exist,value of variable_counter_name varies(变化) from upper_limit to lower_limit.
+		otherwise is from lower_limit to upper_limit
+	
+	Example: count amount of the even(偶数) between 1 and 100
+	declare
+	sum_even int:=0;
+	begin
+	for i in reverse 1..100 loop
+	dbms_output.put_line(i);
+	if mod(i,2)=0 then
+	sum_even:=sum_even+1;
+	end if;
+	end loop;
+	dbms_output.put_line('range(1 to 100): amount of even is '||sum_even);
+	end;
+	/
+	
+		
+		
+		
+		
+		
+		
+	
