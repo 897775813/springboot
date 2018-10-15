@@ -210,4 +210,44 @@ Spring Boot的版本仲裁中心，
 
 ​	
 
-​	 
+```
+@AutoConfigurationPackage
+@Import(AutoConfigurationImportSelector.class)
+public @interface EnableAutoConfiguration
+```
+
+​	 @AutoConfigurationPackage：自动配置包
+
+​		
+
+```
+@Import(AutoConfigurationPackages.Registrar.class)
+public @interface AutoConfigurationPackage
+```
+
+​	Spring的底层注解@Import，给容器中导入一个组件；导入的组件由AutoConfigurationPackages.Registrar.class；
+
+​	`将主配置类(@SpringBootApplication标注的类)的所在包及子包下面的所有组件扫描到Spring容器里。`
+
+EnableAutoConfiguration.class:
+
+```
+@Import(AutoConfigurationImportSelector.class)
+public @interface EnableAutoConfiguration
+```
+
+给容器导入选择器：
+
+AutoConfigurationImportSelector：
+
+将所有需要导入的组件以全类名的方式返回；这些组件就会被添加到容器中。会给容器导入非常多的自动配置类。
+
+## 6、快速创建Spring Boot
+
+STS插件创建，或者官网创建。
+
+- resource文件夹目录结构
+  1. static：静态资源：js、css、images
+  2. templates：模板页面（Spring Boot默认从jar包使用嵌入式tomcat，默认不支持JSP页面）；可以使用模板引擎（freemarker、thymeleaf）
+  3. application.properties：Spring Boot应用的配置文件；
+
