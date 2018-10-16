@@ -251,3 +251,154 @@ STS插件创建，或者官网创建。
   2. templates：模板页面（Spring Boot默认从jar包使用嵌入式tomcat，默认不支持JSP页面）；可以使用模板引擎（freemarker、thymeleaf）
   3. application.properties：Spring Boot应用的配置文件；
 
+
+# 二、配置文件
+
+## 1、配置文件
+
+使用全局的配置文件，固定名称：
+
+- application.propertie
+- application.yaml
+
+配置文件作用：修改默认配置
+
+YAML：以数据为中心
+
+Example：
+
+YAML
+
+```yaml
+server:
+  port: 8081
+```
+
+XML
+
+```
+<server>
+	<port>8081</port>
+</server>
+```
+
+##2、YAML语法：
+
+### 1、基本语法
+
+- 'key：[空格]value':表示一堆键值对（空格必须有）
+- 以空格的缩进来控制层级关系:只要是左对齐的一列数据，都是同一个层级
+- 属性和值大小写敏感
+
+### 2、值得写法
+
+####1、字面量： 普通值（数字、字符串、boolean）：
+
+​	格式：key:[空格]value
+
+​	字符串默认不用加上单引号或者双引号；
+
+​	"" : 双引号，不会转义字符串里面的特殊字符；
+
+​	''  : 单引号，会转义特殊字符； 
+
+####2、对象、Map（属性和值）（键值对）：
+
+​	格式：key:[空格]value
+
+​	Example:
+
+​	friend对象	
+
+```yaml
+friend:
+    lastname: zhangsan
+    age: 20
+-------------------------------
+行内写法
+-------------------------------
+friend: {lastname: zhangsan,age: 20}
+```
+
+####3、数组（List、Set）：
+
+​	格式：用 - 值表示数组中的一个元素
+
+​	数组名：
+
+​            -[空格]paramter1,
+
+​	    -[空格]paramter2,
+
+​	    -[空格]paramter3,
+
+​	Example：
+
+```yaml
+pets:
+ - cat
+ - dog
+ - pig
+-------------------------------
+行内写法
+-------------------------------
+pets: [cat,dog,pig]
+```
+
+#####1、@ConfigurationProperties(prefix="name")
+
+​	告诉SpringBoot将本类中的所有属性和配置文件中相关配置进行绑定
+
+​	只有这个组件是容器中的组件，才能容器提供ConfigurationProperties功能
+
+所以要添加@Component
+
+在pom.xml文件中添加注解配置文件绑定提示依赖：
+
+```xml
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-configuration-processor</artifactId>
+	<optional>true</optional>
+</dependency>
+```
+
+JavaBean：
+
+```java
+@Component
+@ConfigurationProperties(prefix="person")
+public class person{}
+```
+
+##### 2、不用@ConfigurationProperties配合配置文件进行赋值
+
+用@Value("parameter_value\${key}从环境变量、配置文件获取值 \ #{SpEL}")（Spring底层方法）
+
+##### @Value和@ConfigurationProperties获取值区别
+
+|                     | Value | ConfigurationProperties |
+| ------------------- | ----- | ----------------------- |
+| 支持松散语法绑定（例：_和-代替大写) | ×     | √                       |
+| 支持SpEL              | √     | ×                       |
+| 功能                  | 一个个指定 | 批量指定                    |
+| JSR303数据校验          | ×     | √                       |
+| 复杂类型封装              | ×     | √                       |
+
+*JSR303数据校验：使用@Validated（校验注解)
+
+Example:
+
+```java
+@Component
+@ConfigurationProperties(prefix="people")
+@Validated
+public class people{
+  @Email	//校验必须是Email格式字符串
+  String lastName;
+}
+```
+
+*配置文件yml和properties都能获取值
+
+*如果说，我们只是在业务逻辑中需要获取配置文件中某项值，用@Value,如果说，我们专门编写一个JavaBean来和配置文件进行映射，使用@ConfigurationProperties
