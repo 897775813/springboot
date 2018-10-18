@@ -3,9 +3,9 @@
 ## 1、Spring Boot 简介
 
 	- 简化Spring应用开发的一个框架
-
+	
 	- 整个Spring技术栈的一个大整合
-
+	
 	- J2EE开发的一站式解决方案
 
 ## 2、微服务
@@ -292,7 +292,7 @@ XML
 
 ### 2、值得写法
 
-####1、字面量： 普通值（数字、字符串、boolean）：
+#### 1、字面量： 普通值（数字、字符串、boolean）：
 
 ​	格式：key:[空格]value
 
@@ -302,7 +302,7 @@ XML
 
 ​	''  : 单引号，会转义特殊字符； 
 
-####2、对象、Map（属性和值）（键值对）：
+#### 2、对象、Map（属性和值）（键值对）：
 
 ​	格式：key:[空格]value
 
@@ -345,7 +345,7 @@ pets:
 pets: [cat,dog,pig]
 ```
 
-#####1、@ConfigurationProperties(prefix="name")
+##### 1、@ConfigurationProperties(prefix="name")
 
 ​	告诉SpringBoot将本类中的所有属性和配置文件中相关配置进行绑定
 
@@ -375,7 +375,7 @@ public class person{}
 
 用@Value("parameter_value\${key}从环境变量、配置文件获取值 \ #{SpEL}")（Spring底层方法）
 
-##### @Value和@ConfigurationProperties获取值区别
+##### 3、@Value和@ConfigurationProperties获取值区别
 
 |                     | Value | ConfigurationProperties |
 | ------------------- | ----- | ----------------------- |
@@ -402,3 +402,97 @@ public class people{
 *配置文件yml和properties都能获取值
 
 *如果说，我们只是在业务逻辑中需要获取配置文件中某项值，用@Value,如果说，我们专门编写一个JavaBean来和配置文件进行映射，使用@ConfigurationProperties
+
+##### 4、@PropertySource&@ImportResource
+
+###### 	1、@PropertySource
+
+​	加载制定配置文件
+
+​	格式:@PropertySource(value = "classpath:filename")
+
+######         2、@ImportResource
+
+​	导入Spring的配置文件
+
+​	Spring Boot 没有Spring配置文件，不能自动识别自己编写的Spring文件
+
+​	格式：@ImportResource(location = "classpath:filename")
+
+* Spring Boot 推荐给容器中添加组件的方式：全注解方式
+
+   1、配置类======Spring配置文件
+
+   ​	@Configuration：指明当前类是配置类
+
+   ​	<bean>对应@Bean:将方法返回值添加到容器中
+
+#### 3、配置文件占位符
+
+格式：${function} \ ${object.parameter:[default_value]}
+
+Example：
+
+```xml
+person.age=${random.int}
+person.dog.name=${person.hello:hello} 
+//dog的name获取person.hello属性的名字，如果hello不存在，则默认为hello，即:后面的值
+```
+
+#### 4、Profile
+
+​	解决不同环境，不同配置文件转换问题。
+
+##### 1、多profile文件
+
+在主配置文件编写的时候，文件名可以是 application-{profile}.properties/yml.
+
+创建多个配置文件，默认为application.properties。
+
+##### 2、yml支持多文档块方式
+
+用 --- 分割文档
+
+Example:
+
+```ym
+server: 
+	port: 8081
+spring:
+	profile: choose_profile_name
+---
+server:
+	port: 8082
+spring:
+	profile: profile_name1
+---
+server:
+	port: 8082
+spring:
+	profile: profile_name2
+```
+
+
+
+##### 3、激活制定profile
+
+* 在默认配置文件中，配置spring.profile.acive=profile_name
+
+* 或则命令行模式：
+
+  java -jar jar_name.jar --spring.profile.acive=profile_name
+
+  可以直接在测试的时候，配置传入命令行参数
+
+* 虚拟机参数：-Dspring.profile.acive=profile_name
+
+#### 5、配置文件加载位置
+
+* springboot启动会扫描以下位置的application.properties \ yml文件作为默认配置文件
+  - file: ./config/
+  - file:./
+  - classpath:/config/
+  - classpath:/
+  - 以上是按照优先级从高到低的顺序，所有位置的文件都会被加载，高优先级配置内容会覆盖低优先级配置内容。
+  - 可以通过配置spring.config.location改变默认位置，项目打包好之后，用命令行参数来制定配置文件的新位置
+  - 互补配置：相同内容采取高优先级文件内容，不同内容则都会加载
