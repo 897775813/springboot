@@ -3,11 +3,11 @@
 ## 1、Spring Boot 简介
 
 	- 简化Spring应用开发的一个框架
-	
+
 	- 整个Spring技术栈的一个大整合
-	
+
 	- J2EE开发的一站式解决方案
-	
+
 	- 官方文档：https://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/
 
 ## 2、微服务
@@ -431,7 +431,7 @@ public class people{
 
 #### 3、配置文件占位符
 
-格式：${function} \ ${object.parameter:[default_value]}
+格式： ${object.parameter:[default_value]}
 
 Example：
 
