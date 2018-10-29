@@ -560,9 +560,9 @@ spring:
        ```
 
 
-  4. 所有在配置文件中嫩配置的属性都是在xxxxProperties类中封装的；
+    4. 所有在配置文件中嫩配置的属性都是在xxxxProperties类中封装的；
 
-  5. 精髓：
+    5. 精髓：
 
 
          1. SpringBoot启动加载大量的自动配置类
@@ -584,20 +584,20 @@ spring:
 
 ###### 2、@Conditional扩展
 
-| @Conditional扩展注解            | 作用（判断是否满前当前条件）                     |
-| ------------------------------- | ------------------------------------------------ |
-| @ConditionalOnJava              | 系统的java版本是否符合要求                       |
-| @ConditionalOnBean              | 容器中存在指定Bean                               |
-| @ConditionalOnMissingBean       | 容器中不存在指定Bean                             |
-| @ConditionalOnExpression        | 满足SpEL表达式指定                               |
-| @ConditionalOnClass             | 系统中有指定类                                   |
-| @ConditionalOnMissingClass      | 系统中没有指定类                                 |
+| @Conditional扩展注解                | 作用（判断是否满前当前条件）                 |
+| ------------------------------- | ------------------------------ |
+| @ConditionalOnJava              | 系统的java版本是否符合要求                |
+| @ConditionalOnBean              | 容器中存在指定Bean                    |
+| @ConditionalOnMissingBean       | 容器中不存在指定Bean                   |
+| @ConditionalOnExpression        | 满足SpEL表达式指定                    |
+| @ConditionalOnClass             | 系统中有指定类                        |
+| @ConditionalOnMissingClass      | 系统中没有指定类                       |
 | @ConditionalOnSingleCandidate   | 容器中只有一个指定的Bean，或者这个Bean是首选Bean |
-| @ConditionalOnProperty          | 系统中指定的属性是否有指定的值                   |
-| @ConditionalOnResource          | 类路径下是否存在指定的资源文件                   |
-| @ConditionalOnWebApplication    | 当前是否是web环境                                |
-| @ConditionalOnNotWebApplication | 当前不是web环境                                  |
-| @ConditionalOnJndi              | JNDI存在指定项                                   |
+| @ConditionalOnProperty          | 系统中指定的属性是否有指定的值                |
+| @ConditionalOnResource          | 类路径下是否存在指定的资源文件                |
+| @ConditionalOnWebApplication    | 当前是否是web环境                     |
+| @ConditionalOnNotWebApplication | 当前不是web环境                      |
+| @ConditionalOnJndi              | JNDI存在指定项                      |
 
 自动配置类必须在一定条件下才能生效！！
 
@@ -615,8 +615,8 @@ spring:
 
 ​	
 
-| 日志门面（日志抽象层）    | 日志实现                    |
-| ------------------------- | --------------------------- |
+| 日志门面（日志抽象层）             | 日志实现                     |
+| ----------------------- | ------------------------ |
 | JCL、SLF4j、jboss-logging | Log4j、JUL、Log4j2、Logback |
 
 左边选一个门面（抽象层）、右边选一个实现；
@@ -637,7 +637,9 @@ SpringBoot ：底层是Spring框架，Spring框架默认使用JCL；
 
 以后开发的时候，日志记录方法的调用，不应该直接调用日志的实现类，而是调用日志抽象层里面的方法
 
-官网：https://www.slf4j.org/
+官网：
+
+[SLF4j官网]: https://www.slf4j.org/
 
 在系统里面导入slf4j的jar和logback的实现jar
 
@@ -653,7 +655,128 @@ public class HelloWorld {
 }
 ```
 
+每一个日志的实现框架都有自己的配置文件。使用slf4j以后，配置文件还是做成日志实现框架的配置文件；
 
+### 2、遗留问题
 
+a(slf4j+logback):Spring（common-logging）、Hibernate（jboss-logging）、MyBatis、xxx
 
+统一日志记录，即使是别的框架和我一起统一使用slf4j进行输出？
 
+查看官网legacy API
+
+1、将系统中其他日志框架先排除
+
+2、用中间包来替换原有日志框架
+
+3、我们导入slf4j其他的实现
+
+## 3、Spring Boot日志关系
+
+``` xml
+<dependency>               				 			<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter</artifactId>
+	<version>2.0.5.RELEASE</version>
+</dependency>
+```
+
+SpringBoot使用它来做日志功能:
+
+```xml
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-logging</artifactId>
+	<version>2.0.5.RELEASE</version>
+</dependency>
+```
+
+总结：
+
+​	1、Springboot底层也是使用slf4j+logback的方式进行日志记录
+
+​	2、Springboot也把其他的日志都替换成了slf4j
+
+​	3、中间的替换包：
+
+```xml
+  <dependencies>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.3</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-to-slf4j</artifactId>
+      <version>2.10.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jul-to-slf4j</artifactId>
+      <version>1.7.25</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+```
+
+​	4、如果我们要引入其他框架，一定要把默认日志框架的jar移除
+
+​		SrpingBoot能自动适配所有日志，而且底层使用slf4j+logback方式记录日志，引入其他框架的时候，只需要把这个框架依赖的日志框架排除掉；
+
+## 4、日志使用
+
+### 1、默认配置
+
+Springboot默认帮我们配置好了日志
+
+```java
+	//记录器
+	Logger logger = LoggerFactory.getLogger(getClass());
+
+	@Test
+	public void contextLoads() {
+		
+		//日志的级别
+		//由低到高
+		//可以调整需要输出的日志级别
+		logger.trace("这是trace日志。。。");
+		logger.debug("这是debug日志。。。");
+		//SpringBoot默认给我们使用的是info级别的，没有指定别的级别默认规定级别：root级别
+		logger.info("这是info日志。。。");
+		logger.warn("这是warn日志");
+		logger.error("这是error日志");
+	}
+```
+
+可以在application.properties中配置日志的默认设置
+
+```xml
+logging.level.com.atguigu = [root_value]
+
+#在当前磁盘的根路径下创建Spring文件夹和里面的log文件夹；使用spring.log作为默认文件
+logging.path = [path]
+
+#输出到指定的文件内，不指定路径，在当前项目下生成，如果指定则在指定的路径生成
+
+logging.file=[path]
+
+#在控制台输出的日志的格式
+
+logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n
+
+#指定文件中日志输出的格式
+logging.pattern.file=%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n
+```
+
+日志输出格式：
+
+| 参数          | 含义                         |
+| ----------- | -------------------------- |
+| %thread     | 表示线程名                      |
+| %d          | 表示日期格式                     |
+| %-5level    | 级别从做显示5个字符宽度               |
+| %logger{50} | 表示logger名字最长50个字符，否则按照句点分割 |
+| %msg        | 日志消息                       |
+| %n          | 换行符                        |

@@ -1,0 +1,14 @@
+person: 
+  age: 100
+  dog:
+   name: dd
+   age: 15
+  boss: true
+  map:
+    hello: 1
+    hi: 2
+  list:
+   - 1
+   - 2
+   - 3
+  last-name: yang
