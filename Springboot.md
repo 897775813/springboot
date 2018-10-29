@@ -498,3 +498,162 @@ spring:
   - 以上是按照优先级从高到低的顺序，所有位置的文件都会被加载，高优先级配置内容会覆盖低优先级配置内容。
   - 可以通过配置spring.config.location改变默认位置，项目打包好之后，用命令行参数来制定配置文件的新位置
   - 互补配置：相同内容采取高优先级文件内容，不同内容则都会加载
+
+#### 6、外部配置加载顺序
+
+​	Springboot可以从以下位置加载配置；优先级从高到低；高优先级配置覆盖低优先级配置内容，所有配置形成互补
+
+ - 命令行参数 --[paramter]=value
+ - 来自Java：comp/env的JNDI属性
+ - Java系统属性(System.getProperties() )
+ - 操作系统环境变量
+ - RandomValuePropertySource配置的random.*属性值
+ - jar包外部的application-{profile}.properties/yml(带spring.profile)配置文件
+ - jar包内部的application-{profile}.properties/yml(带spring.profile)配置文件
+ - jar包外部的application-{profile}.properties/yml(不带spring.profile)配置文件
+- jar包内部的application-{profile}.properties/yml(不带spring.profile)配置文件
+- @configuration注解类上的@p'ropertysource
+- 通过@SpringApplication.setDefaultProperties指定的默认属性
+
+#### 7、自动配置原理
+
+配置文件到底能写什么？怎么写？
+
+##### 1.自动配置原理：
+
+  1. SpringBoot启动的时候加载主配置类，开启了自动配置功能。
+
+  2. @EnableAutoConfiguration作用：
+
+     利用EnableAutoConfigurationImportSelector给容器导入组件。
+
+     * 详细看selectimport方法。
+
+     * get CandidateConfigurations(annotationMetadate,attributes);获取候选的配置
+
+       - SpringFactoriesLoader.loadFactoryNames()
+
+       - 扫描所有jar包类路径下的 META-INF/spring.factories
+
+       - 把扫描到的这些文件的内容包装成properties对象
+
+       - 从properties中获取到EnableAutoConfiguration.class类（类名）对应的值，然后添加到容器中
+
+         将META-INF/spring.factories的所有EnableAutoConfiguration的值加入到容器中。
+
+     * 每一个自动配置类进行自动配置
+
+  3. 以HttpEncodingAutoConfiguration为例解释自动配置原理：
+
+       根据当前不同的判断条件，决定这个配置类是否生效
+
+       ``` java
+       @Configuration //表示这是一个配置类，以前编写的配置文件一样，也可以给容器中添加组件
+       @EnableConfigurationProperties(HttpEncodingProperties.class)//启动指定类的ConfigurationProperties功能；
+       //将配置文件中对应的值和HttpEncodingProperties绑定起来；
+       @ConditionalOnWebApplication //Sping底层@Conditional注解，根据不同的条件，如果满足指定的条件，整个配置类里面的配置就会生效；判断当前应用是否是web应用，如果是，当前配置生效
+       @ConditionalOnClass(CharacterEncodingFilter.class) //判断当前项目有没有这个类
+       //CharacterEncodingFilter:Srping MVC中进行乱码解决的过滤器
+       @ConditionalOnProperty(prefix = "spring.http.encoding",value="enabled",matchIfMissing = true)  
+       //判断配置文件中是否存在某个配置，spring.http.encoding；如果不存在，判断也是成立的
+       public class HttpEncodingAutoConfiguration{...}
+       ```
+
+
+  4. 所有在配置文件中嫩配置的属性都是在xxxxProperties类中封装的；
+
+  5. 精髓：
+
+
+         1. SpringBoot启动加载大量的自动配置类
+         2. 判断需要的功能有没有自动配置类
+         3. 看自动配置类中配置了哪些组件
+         4. 给容器中自动配置类添加组件时候，从properties类中获取某些属性，我们可以在配置文件中指定这些属性的值
+    
+     xxxxAutoConfiguration:自动配置类；
+    
+     给容器添加组件
+    
+     xxxxProperties:封装配置文件中相关属性；
+
+##### 2、细节
+
+	###### 1、@Conditional派生注解(Spring注解版原生@Conditional作用)
+
+​	作用：必须是其指定条件成立，才给容器中添加组件，配置内容才生效
+
+###### 2、@Conditional扩展
+
+| @Conditional扩展注解            | 作用（判断是否满前当前条件）                     |
+| ------------------------------- | ------------------------------------------------ |
+| @ConditionalOnJava              | 系统的java版本是否符合要求                       |
+| @ConditionalOnBean              | 容器中存在指定Bean                               |
+| @ConditionalOnMissingBean       | 容器中不存在指定Bean                             |
+| @ConditionalOnExpression        | 满足SpEL表达式指定                               |
+| @ConditionalOnClass             | 系统中有指定类                                   |
+| @ConditionalOnMissingClass      | 系统中没有指定类                                 |
+| @ConditionalOnSingleCandidate   | 容器中只有一个指定的Bean，或者这个Bean是首选Bean |
+| @ConditionalOnProperty          | 系统中指定的属性是否有指定的值                   |
+| @ConditionalOnResource          | 类路径下是否存在指定的资源文件                   |
+| @ConditionalOnWebApplication    | 当前是否是web环境                                |
+| @ConditionalOnNotWebApplication | 当前不是web环境                                  |
+| @ConditionalOnJndi              | JNDI存在指定项                                   |
+
+自动配置类必须在一定条件下才能生效！！
+
+我们怎么知道哪些自动配置类生效？
+
+开启Debug模式：在配置文件配置debug=true，让控制台打印自动配置类的信息；
+
+# 三、日志
+
+## 1、日志框架
+
+​	市面上常用的日志框架：
+
+​	JUL、JCL、jboss-logging、logback、log4j、log4j2、sft4j...
+
+​	
+
+| 日志门面（日志抽象层）    | 日志实现                    |
+| ------------------------- | --------------------------- |
+| JCL、SLF4j、jboss-logging | Log4j、JUL、Log4j2、Logback |
+
+左边选一个门面（抽象层）、右边选一个实现；
+
+日志门面：SLF4J;
+
+日志实现：Logback;
+
+
+
+SpringBoot ：底层是Spring框架，Spring框架默认使用JCL；
+
+​	SpringBoot选用SLF4J和Logback
+
+## 2、SLF4j使用
+
+### 1、如何在系统中使用SLF4j
+
+以后开发的时候，日志记录方法的调用，不应该直接调用日志的实现类，而是调用日志抽象层里面的方法
+
+官网：https://www.slf4j.org/
+
+在系统里面导入slf4j的jar和logback的实现jar
+
+```java
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class HelloWorld {
+  public static void main(String[] args) {
+    Logger logger = LoggerFactory.getLogger(HelloWorld.class);
+    logger.info("Hello World");
+  }
+}
+```
+
+
+
+
+
