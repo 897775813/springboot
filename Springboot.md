@@ -3,12 +3,14 @@
 ## 1、Spring Boot 简介
 
 	- 简化Spring应用开发的一个框架
-
+	
 	- 整个Spring技术栈的一个大整合
-
+	
 	- J2EE开发的一站式解决方案
-
+	
 	- 官方文档：https://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/
+	
+	- 前端页面素材：https://getbootstrap.com
 
 ## 2、微服务
 
@@ -561,7 +563,7 @@ spring:
 
 
     4. 所有在配置文件中嫩配置的属性都是在xxxxProperties类中封装的；
-
+    
     5. 精髓：
 
 
@@ -578,7 +580,7 @@ spring:
 
 ##### 2、细节
 
-	###### 1、@Conditional派生注解(Spring注解版原生@Conditional作用)
+###### 1、@Conditional派生注解(Spring注解版原生@Conditional作用)
 
 ​	作用：必须是其指定条件成立，才给容器中添加组件，配置内容才生效
 
@@ -780,3 +782,67 @@ logging.pattern.file=%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} 
 | %logger{50} | 表示logger名字最长50个字符，否则按照句点分割 |
 | %msg        | 日志消息                       |
 | %n          | 换行符                        |
+
+### 2、指定配置
+
+给类路径下放上每个日志框架自己的配置文件即可；SpringBoot就不使用他默认配置
+
+| Logging System          | Customization                                                |
+| ----------------------- | ------------------------------------------------------------ |
+| Logback                 | `logback-spring.xml`, `logback-spring.groovy`, `logback.xml`, or `logback.groovy` |
+| Log4j2                  | `log4j2-spring.xml` or `log4j2.xml`                          |
+| JDK (Java Util Logging) | `logging.properties`                                         |
+
+`logback.xml`:直接被日志框架识别
+
+`logback-spring.xml`：日志框架不直接加载，日志的配置项由SpringBoot解析日志配置，可使用SpringBoot的高级Profile功能
+
+```xml
+<springProfile name="staging">
+	<!-- configuration to be enabled when the "staging" profile is active -->
+</springProfile>
+
+<springProfile name="dev | staging">
+	<!-- configuration to be enabled when the "dev" or "staging" profiles are active -->
+</springProfile>
+
+<springProfile name="!production">
+	<!-- configuration to be enabled when the "production" profile is not active -->
+</springProfile>
+```
+
+## 5、切换日志框架
+
+可以按照slf4j日志适配图，进行相关的切换；
+
+排除不需要的依赖，导入需要的依赖即可
+
+切换为log4j2：
+
+先排除starter-logging
+
+导入starter-log4j2即可
+
+
+
+# 四、Web开发
+
+ 使用SpringBoot：
+
+1、创建SpringBoot应用，选中我们需要的模块 
+
+2、SpringBoot已经默认将这些场景已经配置好了，只需要在配置文件中指定少量配置就可以运行起来
+
+3、自己编写业务代码
+
+
+
+自动配置原理？
+
+这个场景SpringBoot帮我们配置了什么？能不能修改？能修改哪些配置？能不能扩展？xxx
+
+```xml
+xxxxAutoConfiguration:帮我们给容器中自动配置组件
+xxxxProperties:配置类封装配置文件的内容
+```
+
