@@ -1,0 +1,13 @@
+Docker
+
+docker run [images] -itd /bash/bin 
+-i ： 伪终端
+-t : 交互
+-d : 返回container id
+
+docker cp [local file src] container_id:[container src]
+
+docker attach : step into container that has bean started
+
+---------------------
+DockerFile
